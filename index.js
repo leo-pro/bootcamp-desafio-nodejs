@@ -6,6 +6,27 @@ app.use(express.json());
 
 const projects = [];
 
+//Middlewares Globais
+function checkIdExists(req, res, next) {
+  const { id } = req.params;
+
+  const project = projects.find(p => p.id == id);
+
+  if (!project) {
+    return res.status(400).json({ error: "Project does not exists!" });
+  }
+
+  return next();
+}
+
+function numberOfRequest(req, params, next) {
+  console.count("Number of Requests:");
+
+  return next();
+}
+
+app.use(numberOfRequest);
+
 //HTTP Methods
 // POST/ projects
 app.post("/projects", (req, res) => {
@@ -22,7 +43,7 @@ app.get("/projects", (req, res) => {
 });
 
 // PUT/ projects/:id
-app.put("/projects/:id", (req, res) => {
+app.put("/projects/:id", checkIdExists, (req, res) => {
   const { id } = req.params;
   const { title } = req.body;
 
@@ -34,7 +55,7 @@ app.put("/projects/:id", (req, res) => {
 });
 
 // DELETE/ projects/:id
-app.delete("/projects/:id", (req, res) => {
+app.delete("/projects/:id", checkIdExists, (req, res) => {
   const { id } = req.params;
 
   const projectIndex = projects.find(p => p.id == id);
@@ -45,7 +66,7 @@ app.delete("/projects/:id", (req, res) => {
 });
 
 // POST/ projects/:id/:tasks
-app.post("/projects/:id/tasks", (req, res) => {
+app.post("/projects/:id/tasks", checkIdExists, (req, res) => {
   const { id } = req.params;
   const { title } = req.body;
 
